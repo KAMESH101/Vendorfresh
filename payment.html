@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Payment - Vendor Fresh</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    main {
+      max-width: 500px;
+      margin: 2rem auto;
+      background: #03C04A;
+      padding: 1.5rem;
+      border-radius: 8px;
+      color: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      font-family: Arial, sans-serif;
+    }
+    h2 {
+      margin-bottom: 1rem;
+    }
+    .product-info p {
+      font-size: 1.1rem;
+      margin: 0.3rem 0;
+    }
+    label {
+      margin-top: 1rem;
+      display: block;
+      font-weight: 600;
+    }
+    select {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      cursor: pointer;
+    }
+    .payment-details {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      background: rgba(255,255,255,0.1);
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      white-space: pre-line;
+    }
+    button {
+      background: #2d7a2d;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.8rem 1.5rem;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 1.5rem;
+      width: 100%;
+      user-select: none;
+    }
+    button:hover {
+      background-color: #215b21;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Vendor Fresh</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="farmers.html">Farmers</a>
+      <a href="village-heads.html">Village Heads</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="login.html">Login</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Payment</h2>
+    <div class="product-info" id="productInfo">
+      Loading product details...
+    </div>
+
+    <label for="paymentMethod">Select Payment Method:</label>
+    <select id="paymentMethod">
+      <option value="bank-transfer">Bank Transfer</option>
+      <option value="upi">UPI</option>
+      <option value="net-banking">Net Banking</option>
+      <option value="card">Credit/Debit Card</option>
+    </select>
+
+    <div class="payment-details" id="paymentDetails">
+      Please transfer the amount to the following bank account:
+
+      Bank Name: Example Bank
+      Account Number: 1234567890
+      IFSC Code: EXAMP0001
+      Account Name: Vendor Fresh
+    </div>
+
+    <button id="confirmPaymentBtn">Buy</button>
+  </main>
+
+  <footer>
+    &copy; 2025 Vendor Fresh. All rights reserved.
+  </footer>
+
+  <script>
+    // Product data from URL params
+    function getQueryParam(param) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(param);
+    }
+
+    function displayProductInfo() {
+      const name = getQueryParam('name');
+      const price = getQueryParam('price');
+      const farmer = getQueryParam('farmer');
+      const infoDiv = document.getElementById('productInfo');
+
+      if (name && price && farmer) {
+        infoDiv.innerHTML = `
+          <p><strong>Product:</strong> ${decodeURIComponent(name)}</p>
+          <p><strong>Price:</strong> ${decodeURIComponent(price)}</p>
+          <p><strong>Farmer:</strong> ${decodeURIComponent(farmer)}</p>
+        `;
+      } else {
+        infoDiv.textContent = 'No product details found.';
+      }
+    }
+
+    // Payment instructions by method
+    const paymentInfo = {
+      "bank-transfer": `Please transfer the amount to the following bank account:
+
+Bank Name: Example Bank
+Account Number: 1234567890
+IFSC Code: EXAMP0001
+Account Name: Vendor Fresh`,
+
+      "upi": `Use any UPI app and pay to the following UPI ID:
+UPI ID: vendorfresh@upi`,
+
+      "net-banking": `Login to your net banking portal and transfer the due amount to:
+Account Number: 1234567890
+IFSC Code: EXAMP0001`,
+
+      "card": `You can pay using your credit or debit card securely on delivery or contact our seller for payment link.`
+    };
+
+    function updatePaymentDetails() {
+      const selectedMethod = document.getElementById('paymentMethod').value;
+      const detailsDiv = document.getElementById('paymentDetails');
+      detailsDiv.textContent = paymentInfo[selectedMethod] || '';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      displayProductInfo();
+      updatePaymentDetails();
+
+      document.getElementById('paymentMethod').addEventListener('change', updatePaymentDetails);
+
+      document.getElementById('confirmPaymentBtn').addEventListener('click', () => {
+        alert('Payment Successful! Your order has been placed.');
+        window.location.href = 'index.html'; // Redirect user to homepage or confirmation page
+      });
+    });
+  </script>
+</body>
+</html>
