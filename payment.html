@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Payment - Vendor Fresh</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    main {
+      max-width: 600px;
+      margin: 2rem auto;
+      background: #03C04A;
+      padding: 1.5rem;
+      border-radius: 8px;
+      color: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      font-family: Arial, sans-serif;
+    }
+    h2 {
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .order-summary {
+      background: rgba(255,255,255,0.2);
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+    }
+    .order-summary h3 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid white;
+      padding-bottom: 0.5rem;
+    }
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.8rem 0;
+      font-size: 1.1rem;
+    }
+    .order-item strong {
+      font-weight: 600;
+    }
+    .total-price {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 2px solid white;
+    }
+    label {
+      margin-top: 1rem;
+      display: block;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    select {
+      width: 100%;
+      padding: 0.7rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      cursor: pointer;
+    }
+    .payment-details {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      background: rgba(255,255,255,0.15);
+      padding: 1rem;
+      border-radius: 6px;
+      white-space: pre-line;
+      line-height: 1.6;
+    }
+    button {
+      background: #2d7a2d;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 1rem 1.5rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 1.5rem;
+      width: 100%;
+      user-select: none;
+    }
+    button:hover {
+      background-color: #215b21;
+    }
+    .product-image {
+      width: 100%;
+      max-width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin: 1rem auto;
+      display: block;
+      border: 3px solid white;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Vendor Fresh</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="farmers.html">Farmers</a>
+      <a href="village-heads.html">Village Heads</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="login.html">Login</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Complete Your Payment</h2>
+    
+    <div class="order-summary" id="orderSummary">
+      <h3>Order Summary</h3>
+      <div id="orderDetails">
+        Loading order details...
+      </div>
+    </div>
+
+    <label for="paymentMethod">Select Payment Method:</label>
+    <select id="paymentMethod">
+      <option value="upi">UPI</option>
+      <option value="bank-transfer">Bank Transfer</option>
+      <option value="net-banking">Net Banking</option>
+      <option value="card">Credit/Debit Card</option>
+      <option value="cod">Cash on Delivery</option>
+    </select>
+
+    <div class="payment-details" id="paymentDetails">
+      Use any UPI app and pay to the following UPI ID:
+      UPI ID: vendorfresh@upi
+    </div>
+
+    <button id="confirmPaymentBtn">Confirm Payment & Place Order</button>
+  </main>
+
+  <footer>
+    &copy; 2025 Vendor Fresh. All rights reserved.
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    // Product data from URL params
+    function getQueryParam(param) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(param);
+    }
+
+    function displayOrderDetails() {
+      const productId = getQueryParam('product');
+      const quantity = getQueryParam('quantity');
+      const total = getQueryParam('total');
+      
+      const orderDetailsDiv = document.getElementById('orderDetails');
+
+      if (productId && quantity && total && productData[productId]) {
+        const product = productData[productId];
+        
+        orderDetailsDiv.innerHTML = `
+          <img src="${product.image}" alt="${product.name}" class="product-image">
+          <div class="order-item">
+            <strong>Product:</strong>
+            <span>${product.name}</span>
+          </div>
+          <div class="order-item">
+            <strong>Unit Price:</strong>
+            <span>${product.price}</span>
+          </div>
+          <div class="order-item">
+            <strong>Quantity:</strong>
+            <span>${quantity}</span>
+          </div>
+          <div class="order-item">
+            <strong>Farmer:</strong>
+            <span>${product.farmer}</span>
+          </div>
+          <div class="order-item total-price">
+            <strong>Total Amount:</strong>
+            <span>₹${total}</span>
+          </div>
+        `;
+      } else {
+        orderDetailsDiv.innerHTML = '<p style="text-align: center;">No order details found. Please go back and select a product.</p>';
+      }
+    }
+
+    // Payment instructions by method
+    const paymentInfo = {
+      "upi": `Use any UPI app and pay to the following UPI ID:
+
+UPI ID: vendorfresh@upi
+Merchant Name: Vendor Fresh`,
+
+      "bank-transfer": `Please transfer the amount to the following bank account:
+
+Bank Name: State Bank of India
+Account Number: 123456789012
+IFSC Code: SBIN0001234
+Account Name: Vendor Fresh Pvt Ltd
+Branch: Mumbai Main Branch`,
+
+      "net-banking": `Login to your net banking portal and transfer the due amount to:
+
+Account Number: 123456789012
+IFSC Code: SBIN0001234
+Bank: State Bank of India
+Beneficiary: Vendor Fresh Pvt Ltd`,
+
+      "card": `You will receive a secure payment link on your registered mobile number and email.
+
+Alternatively, you can pay using card on delivery to our delivery partner.`,
+
+      "cod": `You have selected Cash on Delivery.
+
+Please keep the exact amount ready when our delivery partner arrives.
+
+A small COD charge of ₹40 will be added to your order total.`
+    };
+
+    function updatePaymentDetails() {
+      const selectedMethod = document.getElementById('paymentMethod').value;
+      const detailsDiv = document.getElementById('paymentDetails');
+      detailsDiv.textContent = paymentInfo[selectedMethod] || '';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      displayOrderDetails();
+      updatePaymentDetails();
+
+      document.getElementById('paymentMethod').addEventListener('change', updatePaymentDetails);
+
+      document.getElementById('confirmPaymentBtn').addEventListener('click', () => {
+        const productId = getQueryParam('product');
+        const quantity = getQueryParam('quantity');
+        const total = getQueryParam('total');
+        const paymentMethod = document.getElementById('paymentMethod').value;
+        
+        if (productId && quantity && total) {
+          alert(`✅ Payment Successful!\n\nOrder Details:\nProduct: ${productData[productId].name}\nQuantity: ${quantity}\nTotal: ₹${total}\nPayment Method: ${paymentMethod.toUpperCase()}\n\nYour order has been placed successfully!`);
+          window.location.href = 'index.html';
+        } else {
+          alert('Error: Missing order details. Please try again.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
