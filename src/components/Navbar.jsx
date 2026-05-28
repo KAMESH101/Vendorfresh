@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink, Link, useLocation } from 'react-router-dom';
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
@@ -17,11 +17,20 @@ const navItems = [
   { to: '/contact', label: 'Contact' },
 ];
 
+function getInitials(name) {
+  if (!name) return '?';
+  const parts = name.trim().split(' ');
+  return parts.length >= 2
+    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    : name[0].toUpperCase();
+}
+
 export default function Navbar({ onCartOpen }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { cartCount } = useCart();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -63,7 +72,20 @@ export default function Navbar({ onCartOpen }) {
             </li>
           ))}
 
-          {/* Auth Links (mobile) */}
+          {/* Mobile-only auth links */}
+          {isAuthenticated && (
+            <li style={{ listStyle: 'none' }} className="mobile-auth-link">
+              <NavLink
+                to="/profile"
+                className={({ isActive }) =>
+                  `navbar-link${isActive ? ' active' : ''}`
+                }
+                onClick={() => setMobileOpen(false)}
+              >
+                👤 My Profile
+              </NavLink>
+            </li>
+          )}
           <li style={{ listStyle: 'none' }} className="mobile-auth-link">
             {isAuthenticated ? (
               <button
@@ -90,25 +112,31 @@ export default function Navbar({ onCartOpen }) {
           </li>
         </ul>
 
-        {/* Actions */}
+        {/* Desktop Actions */}
         <div className="navbar-actions">
           {isAuthenticated ? (
+            /* Initials avatar — navigates to /profile */
             <motion.button
+              className="navbar-avatar"
+              onClick={() => navigate('/profile')}
+              aria-label="Go to profile"
+              title={`Profile: ${user?.name}`}
+              whileTap={prefersReducedMotion ? {} : { scale: 0.92 }}
+              whileHover={prefersReducedMotion ? {} : { scale: 1.08 }}
+            >
+              {getInitials(user?.name)}
+            </motion.button>
+          ) : (
+            /* Login link — visible when not authenticated */
+            <Link
+              to="/login"
               className="navbar-link"
-              onClick={logout}
-              whileTap={prefersReducedMotion ? {} : { scale: 0.96 }}
               style={{
                 background: 'rgba(255,255,255,0.12)',
                 borderRadius: 'var(--radius-sm)',
-                color: 'var(--color-text-light)',
-                fontSize: '0.9rem',
                 padding: '8px 16px',
               }}
             >
-              Logout
-            </motion.button>
-          ) : (
-            <Link to="/login" className="navbar-link" style={{ display: 'none' }}>
               Login
             </Link>
           )}

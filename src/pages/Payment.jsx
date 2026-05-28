@@ -56,6 +56,17 @@ export default function Payment() {
     });
   }, []);
 
+  useEffect(() => {
+    if (user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setForm((prev) => ({
+        ...prev,
+        name: prev.name || user.name || '',
+        email: prev.email || user.email || '',
+      }));
+    }
+  }, [user]);
+
   const validate = () => {
     const errs = {};
     if (!form.name.trim()) errs.name = 'Full name is required';
@@ -105,23 +116,31 @@ export default function Payment() {
     if (!scriptLoaded || !razorpayKey || razorpayKey.includes('mockKey')) {
       // Execute a local mock success simulation callback
       setTimeout(async () => {
+        const orderData = {
+          user_id: 'anonymous',
+          items: cartItems,
+          total_amount: cartTotal,
+          payment_status: 'paid',
+          razorpay_order_id: 'mock_order_id_' + Date.now(),
+          razorpay_payment_id: 'mock_payment_id_' + Date.now(),
+          delivery_name: form.name,
+          delivery_email: form.email,
+          delivery_phone: form.phone,
+          delivery_address: form.address,
+          created_at: new Date().toISOString()
+        };
+
         try {
-          const { error } = await supabase.from('orders').insert({
-            user_id: user?.id || 'anonymous',
-            items: cartItems,
-            total_amount: cartTotal,
-            payment_status: 'paid',
-            razorpay_order_id: 'mock_order_id_' + Date.now(),
-            razorpay_payment_id: 'mock_payment_id_' + Date.now(),
-            delivery_name: form.name,
-            delivery_email: form.email,
-            delivery_phone: form.phone,
-            delivery_address: form.address,
-          });
-          if (error) console.error('Error saving order to Supabase:', error);
+          const { error } = await supabase.from('orders').insert(orderData);
+          if (error) console.warn('Supabase save failed, using local fallback:', error.message);
         } catch (dbErr) {
-          console.error('Error saving order:', dbErr);
+          console.warn('Supabase connection error, using local fallback:', dbErr);
         }
+
+        // Save locally as fallback to guarantee profile display
+        const localOrders = JSON.parse(localStorage.getItem('vendorfresh_local_orders') || '[]');
+        localOrders.unshift(orderData);
+        localStorage.setItem('vendorfresh_local_orders', JSON.stringify(localOrders));
 
         setLoading(false);
         setPaid(true);
@@ -142,25 +161,33 @@ export default function Payment() {
         currency: 'INR',
         name: 'VendorFresh',
         description: 'Direct Farm Produce Checkout',
-        image: 'https://raw.githubusercontent.com/KAMESH101/Vendorfresh/main/images/Logo.png',
+        image: '/images/Logo.png',
         handler: async function (response) {
+          const orderData = {
+            user_id: 'anonymous',
+            items: cartItems,
+            total_amount: cartTotal,
+            payment_status: 'paid',
+            razorpay_order_id: response.razorpay_order_id || null,
+            razorpay_payment_id: response.razorpay_payment_id,
+            delivery_name: form.name,
+            delivery_email: form.email,
+            delivery_phone: form.phone,
+            delivery_address: form.address,
+            created_at: new Date().toISOString()
+          };
+
           try {
-            const { error } = await supabase.from('orders').insert({
-              user_id: user?.id || 'anonymous',
-              items: cartItems,
-              total_amount: cartTotal,
-              payment_status: 'paid',
-              razorpay_order_id: response.razorpay_order_id || null,
-              razorpay_payment_id: response.razorpay_payment_id,
-              delivery_name: form.name,
-              delivery_email: form.email,
-              delivery_phone: form.phone,
-              delivery_address: form.address,
-            });
-            if (error) console.error('Error saving order to Supabase:', error);
+            const { error } = await supabase.from('orders').insert(orderData);
+            if (error) console.warn('Supabase save failed, using local fallback:', error.message);
           } catch (dbErr) {
-            console.error('Error saving order:', dbErr);
+            console.warn('Supabase connection error, using local fallback:', dbErr);
           }
+
+          // Save locally as fallback to guarantee profile display
+          const localOrders = JSON.parse(localStorage.getItem('vendorfresh_local_orders') || '[]');
+          localOrders.unshift(orderData);
+          localStorage.setItem('vendorfresh_local_orders', JSON.stringify(localOrders));
 
           setLoading(false);
           setPaid(true);
@@ -344,6 +371,7 @@ export default function Payment() {
                   placeholder="recipient@email.com"
                   value={form.email}
                   onChange={handleChange}
+                  disabled={!!user}
                 />
                 {errors.email && <p className="form-error">{errors.email}</p>}
               </div>

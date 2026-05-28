@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../hooks/useCart';
+import { useAuth } from '../hooks/useAuth';
 
 const prefersReducedMotion =
   typeof window !== 'undefined' &&
@@ -9,11 +11,20 @@ const prefersReducedMotion =
 export default function ProductCard({ product, index = 0 }) {
   const [isFlipped, setIsFlipped] = useState(false);
   const { dispatch } = useCart();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-60px' });
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
+
+    // Guard: require sign-in to add items
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: '/products', reason: 'add-to-cart' } });
+      return;
+    }
+
     dispatch({ type: 'ADD_ITEM', payload: product });
 
     // Animate the cart icon with a bounce

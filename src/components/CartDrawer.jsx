@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../hooks/useCart';
+import { useAuth } from '../hooks/useAuth';
 
 const prefersReducedMotion =
   typeof window !== 'undefined' &&
@@ -8,6 +9,17 @@ const prefersReducedMotion =
 
 export default function CartDrawer({ isOpen, onClose }) {
   const { cartItems, cartTotal, dispatch } = useCart();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const handleCheckout = () => {
+    onClose();
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: '/payment', reason: 'checkout' } });
+      return;
+    }
+    navigate('/payment');
+  };
 
   return (
     <AnimatePresence>
@@ -147,16 +159,15 @@ export default function CartDrawer({ isOpen, onClose }) {
                   <span className="cart-total-label">Total</span>
                   <span className="cart-total-value">₹{cartTotal}</span>
                 </div>
-                <Link to="/payment" onClick={onClose}>
-                  <motion.button
-                    className="btn btn-cart"
-                    whileTap={prefersReducedMotion ? {} : { scale: 0.96 }}
-                    whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
-                    style={{ width: '100%' }}
-                  >
-                    Proceed to Payment
-                  </motion.button>
-                </Link>
+                <motion.button
+                  className="btn btn-cart"
+                  onClick={handleCheckout}
+                  whileTap={prefersReducedMotion ? {} : { scale: 0.96 }}
+                  whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
+                  style={{ width: '100%' }}
+                >
+                  Proceed to Payment
+                </motion.button>
               </div>
             )}
           </motion.aside>

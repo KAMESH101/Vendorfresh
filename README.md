@@ -18,6 +18,18 @@ A modern, full-stack e-commerce platform that connects consumers directly with l
 - 🎨 **Premium UI/UX** — Glassmorphic design system, smooth Framer Motion animations, and responsive layouts.
 - 🌙 **Dark Mode** — Full dark-mode support with CSS custom properties.
 - 🔎 **Search & Filter** — Real-time product search and category filter on the Products page.
+- 🚚 **Dynamic Delivery Tracker** — Immersive stepper showing delivery stages ("Placed" ➔ "Shipping" ➔ "Delivered") based on timestamp offsets, styled with dynamic visual indicator bars.
+- 💾 **Dual-Mode Persistence** — Seamlessly records and queries transactions via Supabase with automatic, zero-configuration fallback to local storage if database tables have not been created.
+
+---
+
+## 📦 Robust Dual-Mode Architecture & Visual Tracking
+
+VendorFresh is built with high-availability and zero-failure resilience for development and production:
+
+* **Visual Purchased Crop Cards**: The user Profile page dynamically extracts each crop from paid orders, displaying product images, harvest locations, and local farmer attributes in an elegant visual grid.
+* **Dual-Mode Persistence Pipeline**: If your Supabase instance is not configured, or if the `orders` table has not yet been initialized via `supabase/schema.sql`, the application automatically fails over to the browser's local storage pipeline (`vendorfresh_local_orders`). This guarantees a fully functional checkout, cart, and profile workflow right out-of-the-box!
+* **Dynamic Time-Based Stepper**: Calculates shipping status automatically from the purchase timestamp, showing live statuses ("Order Placed & Confirmed" ➔ "Out for Delivery / In Transit" ➔ "Delivered Successfully") using highly optimized, themed colors.
 
 ---
 
